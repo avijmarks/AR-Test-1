@@ -30,6 +30,18 @@ public class PlaceARObject : MonoBehaviour
         touch = default;
         return false;
     }
+
+      bool tryGetPlacementAim (out Pose aimPose){
+            Vector2 screenCenter = new Vector2(Screen.width/2f, Screen.height/2f);
+            if (arRaycastManager.Raycast(screenCenter, hits, UnityEngine.XR.ARSubsystems.TrackableType.PlaneWithinPolygon))
+            {
+                aimPose = hits[0].pose;
+                Debug.Log("placement marker moved");
+                return true;
+            }
+            aimPose = default;
+            return false;
+        }
     
     
     static List<ARRaycastHit> hits = new List<ARRaycastHit>();
@@ -44,6 +56,11 @@ public class PlaceARObject : MonoBehaviour
     void Update()
     {
         Touch touch;
+        Pose placementPose; 
+        var aimingAtPlane = tryGetPlacementAim(out placementPose);
+        placementMarker.transform.position = placementPose.position;
+        placementMarker.transform.rotation = placementPose.rotation;
+        
         if(!tryGetTouchPosition(out touch))
         {
             return;
@@ -53,20 +70,8 @@ public class PlaceARObject : MonoBehaviour
                 var hitPose = hits[0].pose;
                 Instantiate(placedPrefab, hitPose.position, hitPose.rotation);
             }
-
-        bool tryGetPlacementAim (out Pose aimPose){
-            Vector2 screenCenter = new Vector2(Screen.width/2f, Screen.height/2f);
-            if (arRaycastManager.Raycast(screenCenter, hits, UnityEngine.XR.ARSubsystems.TrackableType.PlaneWithinPolygon))
-            {
-                aimPose = hits[0].pose;
-                placementMarker.transform.position = aimPose.position;
-                placementMarker.transform.rotation = aimPose.rotation;
-                Debug.Log("placement marker moved");
-                return true;
-            }
-            aimPose = default;
-            return false;
-        }
+        
+      
     }
 
     
